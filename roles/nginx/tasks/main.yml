@@ -1,0 +1,27 @@
+- name: Stop apache2 webserver (if running)
+  service:
+    name: apache2
+    state: stopped
+
+- name: Remove apache2 packages and dependencies (if installed)
+  action: apt pkg="{{ item.name }}" state=absent
+  with_items:
+    - { name: "apache2" }
+    - { name: "apache2-utils" }
+    - { name: "apache2.2-bin" }
+    - { name: "apache2-common" }
+
+- name: Remove apache2 directories (if existent)
+  file:
+    state: absent
+    path: "{{ item.name }}"
+  with_items:
+    - { name: /etc/apache2 }
+    - { name: /usr/lib/apache2 }
+    - { name: /usr/include/apache2 }
+
+- name: Execute nginx.yml
+  include_tasks: nginx-install.yml
+
+- name: Execute nginx-config.yml
+  include_tasks: nginx-config.yml

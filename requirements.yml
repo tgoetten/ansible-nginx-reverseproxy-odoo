@@ -1,0 +1,9 @@
+# Install "NTP" role from GitHub with a specific git branch
+- name: geerlingguy.ntp
+  src: https://github.com/geerlingguy/ansible-role-ntp
+  version: origin/master
+
+# Install official NGINX role from GitHub with a specific git branch
+- name: nginxinc.nginx
+  src: https://github.com/nginxinc/ansible-role-nginx
+  version: origin/master

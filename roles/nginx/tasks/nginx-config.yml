@@ -1,0 +1,53 @@
+---
+- name: Create NGINX configuration dictionary
+  set_fact:
+    nginx_revproxy_sites:
+      tonernerd.com:
+        domains:
+          - tonernerd.com
+          - www.tonernerd.com
+          - shop.tonernerd.com
+        upstreams:
+          - { backend_name: odoo-server, backend_address: 10.3.9.11, backend_port: 8069 } #0 will be used to connect to for web
+          - { backend_name: odoo-server-im, backend_address: 10.9.11, backend_port: 8072 } #1 will be used for instant messanging
+        filters:
+          - { filter_action: allow, filter_ip: 127.0.0.0/8, filter_comment: }
+          - { filter_action: allow, filter_ip: 10.3.7.0/24, filter_comment: }
+          - { filter_action: allow, filter_ip: 10.4.7.0/24, filter_comment: "VPN" }
+          - { filter_action: allow, filter_ip: 213.168.82.128/28, filter_comment: "Trusted Shops LAN" }
+          - { filter_action: allow, filter_ip: 87.79.78.167/32, filter_comment: "Trusted Shops WLAN" }
+          - { filter_action: allow, filter_ip: 89.1.30.47/32, filter_comment: "Weyertal" }
+          - { filter_action: deny,  filter_ip: all, filter_comment: "" }
+
+- name: Check for NGINX folders
+  stat:
+   path: "{{item}}"
+  register: folder_stats
+  with_items:
+  - ["/etc/nginx/sites-enabled/","/etc/nginx/sites-available/"]
+
+- name: Creat NGINX folders if not existend
+  file:
+   path: "{{item.item}}"
+   state: directory
+   mode: 0644
+   group: root
+   owner: root
+  when: item.stat.exists == false
+  with_items:
+  - "{{folder_stats.results}}"
+
+- name: Add Site Config to sites-available/
+  template:
+    src: reverseproxy.conf.j2
+    dest: /etc/nginx/sites-available/{{ item.key }}.conf
+    owner: root
+    group: root
+  with_dict: "{{ nginx_revproxy_sites }}"
+
+- name: Enable Site Config in sites-enabled/
+  file:
+    src: /etc/nginx/sites-available/{{ item.key }}.conf
+    dest: /etc/nginx/sites-enabled/{{ item.key }}
+    state: link
+  with_dict: "{{ nginx_revproxy_sites }}"

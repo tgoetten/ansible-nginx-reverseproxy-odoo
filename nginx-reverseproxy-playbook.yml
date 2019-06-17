@@ -1,0 +1,19 @@
+# https://github.com/jasodeep/ansible-lamp-stack-playbook
+- hosts: all
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+  - name: Install APT packages needed to properly execute this playbook
+    apt:  pkg='{{ ["aptitude","sshpass","sudo","git","mercurial","python-setuptools","python3-minimal","python3-setuptools"]}}'
+          state=present
+          update_cache=yes
+
+  - name: Ensure, all installed packages are updatede to the latest version
+    apt:
+      upgrade: "yes"
+      update_cache: "yes"
+
+  roles:
+    - basic
+    - nginx

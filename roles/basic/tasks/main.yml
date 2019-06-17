@@ -1,0 +1,6 @@
+
+- name: install locale
+  include_tasks: locale.yml
+
+- name: install and configure ntp
+  include_tasks: ntp.yml

@@ -1,0 +1,41 @@
+---
+- hosts: all
+  become: true
+  gather_facts: true
+  remote_user: root
+
+  vars:
+    ansible_remote_user: 'vagrant'
+    ansible_remote_user_password: 'vagrant'
+    ansible_local_user: "{{ lookup('env','USER') }}"
+
+  tasks:
+  - name: Check if ansible_local_user has a public key, otherwise create it
+    local_action:
+      module: user
+      name: "{{ ansible_local_user }}"
+      generate_ssh_key: yes #  This will NOT overwrite an existing SSH key!
+    become: false
+
+  - name: Ensure ansible_remote_user exists, otherwise create him and set the passwword
+    user:
+      name: "{{ ansible_remote_user }}"
+      password: "{{ ansible_remote_user_password }}"
+      update_password: on_create
+      createhome: yes
+
+  - name: Sudoers | update sudoers file and validate
+    lineinfile:
+      path: /etc/sudoers
+      insertafter: EOF
+      state: present
+      regexp: '^{{ ansible_remote_user }} ALL='
+      line: '{{ ansible_remote_user }} ALL=(ALL) NOPASSWD: ALL'
+      validate: '/usr/sbin/visudo -cf %s'
+
+  - name: Last, make sure the ansibile_local_users pub keys are available on the remote machine
+    authorized_key:
+      user: "{{ ansible_remote_user }}"
+      state: present
+      key: "{{ lookup('file', '/home/{{ ansible_local_user }}/.ssh/id_rsa.pub') }}"
+

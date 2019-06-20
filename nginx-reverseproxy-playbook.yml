@@ -3,7 +3,46 @@
   become: true
   gather_facts: true
 
+  vars:
+    nginx_revproxy_sites:
+      dev-tonernerd.com:
+        domains:
+          - dev.tonernerd.com
+          - www-dev.tonernerd.com
+          - shop-dev.tonernerd.com
+        upstreams:
+          - { backend_name: odoo-server, backend_address: 10.3.9.11, backend_port: 8069 } #0 will be used to connect to for web
+          - { backend_name: odoo-server-im, backend_address: 10.9.11, backend_port: 8072 } #1 will be used for instant messanging
+        filters:
+          - { filter_action: allow, filter_ip: 127.0.0.0/8, filter_comment: }
+          - { filter_action: allow, filter_ip: 10.3.7.0/24, filter_comment: }
+          - { filter_action: allow, filter_ip: 10.4.7.0/24, filter_comment: "VPN" }
+          - { filter_action: allow, filter_ip: 213.168.82.128/28, filter_comment: "Trusted Shops LAN" }
+          - { filter_action: allow, filter_ip: 87.79.78.167/32, filter_comment: "Trusted Shops WLAN" }
+          - { filter_action: allow, filter_ip: 89.1.30.47/32, filter_comment: "Weyertal" }
+          - { filter_action: deny,  filter_ip: all, filter_comment: "" }
+
   pre_tasks:
+  - set_fact:
+      nginx_revproxy_sites:
+        tonernerd.com:
+          domains:
+            - tonernerd.com
+            - www.tonernerd.com
+            - shop.tonernerd.com
+          upstreams:
+            - { backend_name: odoo-server, backend_address: 10.3.9.12, backend_port: 8069 } #0 will be used to connect to for web
+            - { backend_name: odoo-server-im, backend_address: 10.9.12, backend_port: 8072 } #1 will be used for instant messanging
+          filters:
+            - { filter_action: allow, filter_ip: 127.0.0.0/8, filter_comment: }
+            - { filter_action: allow, filter_ip: 10.3.7.0/24, filter_comment: }
+            - { filter_action: allow, filter_ip: 10.4.7.0/24, filter_comment: "VPN" }
+            - { filter_action: allow, filter_ip: 213.168.82.128/28, filter_comment: "Trusted Shops LAN" }
+            - { filter_action: allow, filter_ip: 87.79.78.167/32, filter_comment: "Trusted Shops WLAN" }
+            - { filter_action: allow, filter_ip: 89.1.30.47/32, filter_comment: "Weyertal" }
+            - { filter_action: deny,  filter_ip: all, filter_comment: "" }
+      when: "'production' in group_names"
+
   - name: Install APT packages needed to properly execute this playbook
     apt:  pkg='{{ ["aptitude","sshpass","sudo","git","mercurial","python-setuptools","python3-minimal","python3-setuptools"]}}'
           state=present
@@ -14,6 +53,9 @@
       upgrade: "yes"
       update_cache: "yes"
 
+
+
   roles:
-    - basic
-    - nginx
+    - debug
+#    - basic
+#    - nginx

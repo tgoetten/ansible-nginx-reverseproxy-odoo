@@ -26,26 +26,32 @@
     group: root
   with_dict: "{{ nginx_revproxy_sites }}"
 
-- name: Enable Site Config in sites-enabled/
+- name: Make sure NGINX includes site configs from sites-enabled/
+  lineinfile:
+    dest: /etc/nginx/nginx.conf
+    insertafter: "\\s*include\\s\/etc\/nginx\/conf.d\/\\*\\.conf;"
+    line: "    include /etc/nginx/sites-enabled/*.conf;"
+
+- name: Create link to site config in sites-enabled/
   file:
     src: /etc/nginx/sites-available/{{ item.key }}.conf
     dest: /etc/nginx/sites-enabled/{{ item.key }}
     state: link
   with_dict: "{{ nginx_revproxy_sites }}"
 
-- name: Check for site folder
+- name: Check if site folder exist (/var/www/...)
   stat:
    path: "/var/www/{{ item.key }}"
   register: folder_stats_site
   with_dict: "{{ nginx_revproxy_sites }}"
 
-- name: Creat site folder if not existend
+- name: Creat site folder if it not exists (/var/www/...)
   file:
-   path: "{{ item.item }}"
+   path:  "/var/www/{{item.item.key}}"
    state: directory
    mode: 0755
    group: www-data
    owner: www-data
   when: item.stat.exists == false
   with_items:
-  - "{{folder_stats_site.results}}"
+  - "{{ folder_stats_site.results }}"

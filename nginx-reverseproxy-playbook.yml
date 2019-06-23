@@ -41,7 +41,7 @@
             - { filter_action: allow, filter_ip: 87.79.78.167/32, filter_comment: "Trusted Shops WLAN" }
             - { filter_action: allow, filter_ip: 89.1.30.47/32, filter_comment: "Weyertal" }
             - { filter_action: deny,  filter_ip: all, filter_comment: "" }
-      when: "'production' in group_names"
+    when: "'production' in group_names"
 
   - name: Install APT packages needed to properly execute this playbook
     apt:  pkg='{{ ["aptitude","sshpass","sudo","git","mercurial","python-setuptools","python3-minimal","python3-setuptools"]}}'
@@ -53,9 +53,7 @@
       upgrade: "yes"
       update_cache: "yes"
 
-
-
   roles:
-    - debug
-#    - basic
-#    - nginx
+#    - debug
+    - basic
+    - nginx

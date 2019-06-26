@@ -13,9 +13,3 @@ ansible-playbook --inventory-file=hosts.cfg nginx-reverseproxy-playbook.yml -l p
 ## Open issues
 - Hetzner mirror
 - certbot
-domains:
-  - tonernerd.com
-  - www.tonernerd.com
-  - shop.tonernerd.com
-
-  add config to nginx.config    include /etc/nginx/sites-enabled/*;

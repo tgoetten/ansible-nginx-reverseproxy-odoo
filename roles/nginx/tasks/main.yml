@@ -20,6 +20,9 @@
     - { name: /usr/lib/apache2 }
     - { name: /usr/include/apache2 }
 
+- name: Execute install-pip.yml
+  include_tasks: install-pip.yml
+
 - name: Execute nginx.yml
   include_tasks: nginx-install.yml
 

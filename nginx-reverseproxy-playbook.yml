@@ -54,6 +54,6 @@
       update_cache: "yes"
 
   roles:
-#    - debug
-    - basic
-    - nginx
+    - debug
+#    - basic
+#    - nginx

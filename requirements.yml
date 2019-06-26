@@ -7,3 +7,8 @@
 - name: nginxinc.nginx
   src: https://github.com/nginxinc/ansible-role-nginx
   version: origin/master
+
+# Install "pip" role from GitHub with a specific git branch
+- name: geerlingguy.pip
+  src: https://github.com/geerlingguy/ansible-role-pip
+  version: origin/master
